@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Mini Ecommerce</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" 
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js" 
+    integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ" crossorigin="anonymous"></script>
+
+    <style>
+        .card {
+            height: 100%; 
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column; 
+            justify-content: space-between; 
+        }
+
+        .card-title {
+            text-align: center; 
+            margin-bottom: 0.5rem;
+        }
+
+        .card-text {
+            margin-bottom: 1rem; 
+            flex-grow: 1; 
+        }
+
+        .card-price {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem; 
+        }
+
+        .btn {
+            margin-top: auto; 
+        }
+
+        .card .btn {
+            margin-top: 15px;
+        }
+
+        .card-img-top {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand">Mini Ecommerce</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <form class="form-inline ml-auto" id="formItem">
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search" id="keyword" aria-label="Search">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit" id="searchItem">Search</button>
+                </form>
+                <button class="btn btn-primary ml-3" data-toggle="modal" data-target="#cartModal">
+                    <i class="fas fa-shopping-cart"></i> (<span id="cartCount">0</span>)
+                </button>
+            </div>
+        </nav>
+
+        <div class="row mt-3" id="listBarang"></div>
+    </div>
+
+    <div class="modal fade" id="cartModal" tabindex="-1" role="dialog" aria-labelledby="cartModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cartModalLabel">Keranjang Belanja</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group" id="cartItems"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-success" onclick="checkout()">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const items = [
+            ['001', 'Keyboard Logitek', 60000, 'Keyboard yang mantap untuk kantoran', 'https://www.pngmart.com/files/1/Logitech-Gaming-Keyboard-PNG.png'],
+            ['002', 'Keyboard MSI', 300000, 'Keyboard gaming MSI mekanik', 'https://asset.msi.com/global/picture/image/feature/multimeda/keyboard/GK70/GK70-keyboard.png'],
+            ['003', 'Mouse Genius', 50000, 'Mouse Genius biar lebih pinter', 'https://tse1.mm.bing.net/th?id=OIP.fh1RYa9ntrmdrJ7BamOkuQHaHa&pid=Api&P=0&h=220'],
+            ['004', 'Mouse Jerry', 30000, 'Mouse yang disukai kucing', 'https://images-na.ssl-images-amazon.com/images/I/61PXWRzQsXL.AC_SL1500.jpg']
+        ];
+
+        let cart = [];
+
+        function renderItems(data) {
+            const listBarang = document.getElementById('listBarang');
+            listBarang.innerHTML = '';
+            data.forEach(item => {
+                const card = `
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mt-2">
+                        <div class="card">
+                            <img src="${item[4]}" class="card-img-top img-fluid" alt="${item[1]}">
+                            <div class="card-body">
+                                <h5 class="card-title">${item[1]}</h5>
+                                <p class="card-text">${item[3]}</p>
+                                <p class="card-price">Rp ${item[2].toLocaleString('id-ID')}</p>
+                                <button class="btn btn-primary" onclick="addToCart('${item[0]}')">Tambahkan ke keranjang</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                listBarang.insertAdjacentHTML('beforeend', card);
+            });
+        }
+
+        function renderCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartCount = document.getElementById('cartCount');
+            cartItems.innerHTML = '';
+            cart.forEach(item => {
+                const cartItem = `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        ${item.name} - Rp ${item.price.toLocaleString('id-ID')}
+                        <button class="btn btn-danger btn-sm" onclick="removeFromCart('${item.id}')">Hapus</button>
+                    </li>
+                `;
+                cartItems.insertAdjacentHTML('beforeend', cartItem);
+            });
+            cartCount.textContent = cart.length;
+        }
+
+        function addToCart(id) {
+            const item = items.find(item => item[0] === id);
+            if (item) {
+                cart.push({ id: item[0], name: item[1], price: item[2] });
+                renderCart();
+            }
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            renderCart();
+        }
+
+        function searchItems(keyword) {
+            const filteredItems = items.filter(item => item[1].toLowerCase().includes(keyword.toLowerCase()));
+            renderItems(filteredItems);
+        }
+
+        function checkout() {
+            alert('Checkout berhasil!');
+            cart = [];
+            renderCart();
+            $('#cartModal').modal('hide');
+        }
+
+        document.getElementById('formItem').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const keyword = document.getElementById('keyword').value;
+            searchItems(keyword);
+        });
+
+        renderItems(items);
+
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" 
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" 
+    integrity="sha384-UO2eT0CpHqdSJQ6jHty5KVphtPhzWj9WO1clHTMGaZWjUAm5n3U1iOn5+987I7l" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" 
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
